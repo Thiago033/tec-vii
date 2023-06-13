@@ -1,1 +1,1 @@
-/home/thiago/Repositorio/tec-vii/aula001/project-example/target/debug/helloname: /home/thiago/Repositorio/tec-vii/aula001/project-example/src/main.rs
+C:\Repositorio\tec-vii\aula001\project-example\target\debug\helloname.exe: C:\Repositorio\tec-vii\aula001\project-example\src\main.rs
