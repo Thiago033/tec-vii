@@ -1,12 +1,12 @@
 fn main() {
 
-    let current_arch = std::env::consts::ARCH;
+    let array:[i64; 5] = [1, 2, 3, 4, 5];
 
-    match current_arch {
-        "x86" => println!("Detected architecture: x86"),
-        "x86_64" => println!("Detected architecture: x86_64"),
-        "arm" => println!("Detected architecture: ARM"),
-        "aarch64" => println!("Detected architecture: AArch64"),
-        _ => println!("Unknown architecture"),
+    let mut array_sum: i64 = 0;
+
+    for i in 0..array.len() {
+        array_sum = array_sum + array[i];
     }
+
+    println!("{array_sum}");
 }
