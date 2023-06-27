@@ -1,0 +1,6 @@
+{
+    "rust-analyzer.linkedProjects": [
+        "./aula004/bubble-sort/Cargo.toml",
+        "./aula004/bubble-sort/Cargo.toml"
+    ]
+}
