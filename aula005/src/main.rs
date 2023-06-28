@@ -31,25 +31,28 @@ fn new_rectangle() -> Rectangle {
     rectangle
 }
 
-fn sort_rectangles(rectangles_array: &mut Vec<Rectangle>) {
-    rectangles_array.sort_by(|a, b| a.area.cmp(&b.area));
+// fn sort_rectangles(rectangles_array: &mut Vec<Rectangle>) {
+//     rectangles_array.sort_by(|a, b| a.area.cmp(&b.area));
+// }
+
+fn insert_rectangle(rectangles_array: &mut Vec<Rectangle>, rectangle: Rectangle) {
+    let insert_index = rectangles_array.iter().position(|a| a.area > rectangle.area);
+
+    if let Some(position) = insert_index {
+        rectangles_array.insert(position, rectangle);
+    } else {
+        rectangles_array.push(rectangle);
+    }
 }
 
 fn main() {
     let mut rectangles_array: Vec<Rectangle> = Vec::new();
 
     for _ in 0..10 {
-        rectangles_array.push(new_rectangle());
+        let rectangle = new_rectangle();
+        insert_rectangle(&mut rectangles_array, rectangle);
     }
 
-    //Before sorting
-    // for rectangle in &rectangles_array {
-    //     println!("{:?}", rectangle);
-    // }
-
-    sort_rectangles(&mut rectangles_array);
-
-    //After sorting
     for rectangle in &rectangles_array {
         println!("{:?}", rectangle);
     }
