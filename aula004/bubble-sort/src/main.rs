@@ -1,4 +1,5 @@
 use rand::Rng;
+use std::time::Instant;
 
 fn gera_vet(size: usize) -> Vec<i32> {
     let mut rng = rand::thread_rng();
@@ -27,12 +28,16 @@ fn bubble_sort(vet: &mut [i32]) {
 }
 
 fn main() {
-    let size = 10;
+    let size = 20000;
     let mut vet = gera_vet(size);
 
-    println!("Vetor original: {:?}", vet);
+    //println!("Vetor original: {:?}", vet);
 
+    let start = Instant::now();
     bubble_sort(&mut vet);
+    let duration = Instant::now() - start;
 
-    println!("Vetor ordenado: {:?}", vet);
+    //println!("Vetor ordenado: {:?}", vet);
+    println!("Duration: {:?}", duration);
+
 }
