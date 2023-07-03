@@ -1,39 +1,42 @@
 enum Shape {
     Square(f64),               // side
     Circle(f64),               // radius
-    Triangle(f64, f64),        // base and height
     Rectangle(f64, f64),       // base and height
+    Triangle(f64, f64),        // base and height
 }
+
+use Shape::*;
 
 fn main() {
-    let square = Shape::Square(4.0);
-    let circle = Shape::Circle(5.0);
-    let triangle = Shape::Triangle(3.0, 6.0);
-    let rectangle = Shape::Rectangle(2.0, 8.0);
+    // let square = Shape::Square(10.0);
+    // let circle = Shape::Circle(10.0);
+    // let triangle = Shape::Triangle(10.0, 10.0);
+    // let rectangle = Shape::Rectangle(10.0, 10.0);
 
-    calculate_and_print_area(square);
-    calculate_and_print_area(circle);
-    calculate_and_print_area(triangle);
-    calculate_and_print_area(rectangle);
+    let square = Square(10.0);
+    let circle = Circle(10.0);
+    let rectangle = Rectangle(10.0, 10.0);
+    let triangle = Triangle(10.0, 10.0);
+
+    calculate_area(square);
+    calculate_area(circle);
+    calculate_area(rectangle);
+    calculate_area(triangle);
 }
 
-fn calculate_and_print_area(shape: Shape) {
+fn calculate_area(shape: Shape) {
     match shape {
         Shape::Square(side) => {
-            let area = side * side;
-            println!("Area of the square: {}", area);
+            println!("area of the square: {}", (side * side));
         },
         Shape::Circle(radius) => {
-            let area = 3.14 * radius * radius;
-            println!("Area of the circle: {}", area);
-        },
-        Shape::Triangle(base, height) => {
-            let area = 0.5 * base * height;
-            println!("Area of the triangle: {}", area);
+            println!("area of the cicle: {}", (3.14 * (radius * radius)));
         },
         Shape::Rectangle(base, height) => {
-            let area = base * height;
-            println!("Area of the rectangle: {}", area);
+            println!("area of the rectangle: {}", (base * height));
+        },
+        Shape::Triangle(base, height) => {
+            println!("area of the triangle: {}", (0.5 * (base * height)));
         },
     }
 }
