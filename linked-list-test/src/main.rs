@@ -92,13 +92,14 @@ fn main() {
     head.append(9);
     head.append(10);
     head.append(11);
-    // head.update(4, 20);
-    // head.update(0, 6);
+    head.update(0, 6);
+    head.update(1, 20);
+
 
     head.list();
     println!("The size of the list is {}", head.count());
 
-    head.delete(9);
+    head.delete(11);
 
     head.list();
     println!("The size of the list is {}", head.count());
