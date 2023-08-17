@@ -51,7 +51,7 @@ const ROCKET_FUEL: f32 = 100.0;
 const DESIRED_FPS: u32 = 60;
 const SCREEN_SIZE: Vec2 = Vec2::new(800.0, 600.0);
 const MAX_IMPACT_VELOCITY: f32 = 30.0;
-const GRAVITY_ACCELERATION: f32 = 2.0;
+const GRAVITY_ACCELERATION: f32 = 10.0;
 
 // **********************************************************************
 // Utility functions
@@ -97,7 +97,8 @@ struct Player {
     facing: f32,
     velocity: Vec2,
     fuel: f32,
-    thrust: f32,
+    throttle: f32,
+    max_thrust: f32,
     rect: Rect,
 }
 
@@ -110,7 +111,8 @@ fn create_player() -> Player {
         facing: 0.0,
         velocity: Vec2::ZERO,
         fuel: ROCKET_FUEL,
-        thrust: 0.0,
+        throttle: 0.0,
+        max_thrust: 20.0,
         // Rect object stays "inside" player sprite to check collisions
         rect: Rect::new(0.0, 0.0, ROCKET_BBOX.x, ROCKET_BBOX.y)
     }
@@ -141,18 +143,22 @@ fn player_handle_input(rocket: &mut Player, input: &InputState, dt: f32) {
     rocket.facing = rocket.facing % (2.0 * PI);
 
     if rocket.fuel > 0.0 {
-        rocket_thrust(rocket, dt);
+        rocket_throttle(rocket, dt);
     }
 }
 
-fn rocket_thrust(rocket: &mut Player, dt: f32) {
+fn rocket_throttle(rocket: &mut Player, dt: f32) {
     let direction_vector = vec_from_angle(rocket.facing);
-    let thrust_vector = direction_vector * (rocket.thrust);
+    let throttle_vector = direction_vector * (rocket.throttle * rocket.max_thrust);
 
-    rocket.velocity += thrust_vector * (dt);
 
-    if (rocket.fuel > 0.0) && (rocket.thrust > 0.0) {
-        let fuel_consuption = round(rocket.thrust, 2) / 40.0;
+    
+    rocket.velocity += throttle_vector * dt;
+
+
+
+    if (rocket.fuel > 0.0) && (rocket.throttle > 0.0) {
+        let fuel_consuption = round(rocket.throttle, 2) / 40.0;
         rocket.fuel -= fuel_consuption;
     }
 }
@@ -200,7 +206,7 @@ struct MyGame {
     input: InputState,
     rocket_velocity_text: Text,
     rocket_fuel_text: Text,
-    rocket_thrust_text: Text,
+    rocket_throttle_text: Text,
     ground_rect: Rect,
     checkpoint_rect: Rect,
     game_end: bool,
@@ -218,7 +224,7 @@ impl MyGame {
         let assets = Assets::new(ctx)?;
         let rocket_velocity_text = Text::new(format!("{}", 0));
         let rocket_fuel_text= Text::new(format!("{}", ROCKET_FUEL));
-        let rocket_thrust_text= Text::new(format!("{}", 0));
+        let rocket_throttle_text= Text::new(format!("{}", 0));
         let ground_rect = Rect::new(50.0, 550.0, 100.0, 20.0);
         let checkpoint_rect = Rect::new(650.0, 550.0, 100.0, 20.0);
         let game_end: bool = false;
@@ -230,7 +236,7 @@ impl MyGame {
             input: InputState::default(),
             rocket_velocity_text,
             rocket_fuel_text,
-            rocket_thrust_text,
+            rocket_throttle_text,
             ground_rect,
             checkpoint_rect,
             game_end,
@@ -240,7 +246,8 @@ impl MyGame {
     }
 
     fn check_collision(&mut self, ctx: &mut ggez::Context) {
-        if self.ground_rect.overlaps(&self.player.rect) || self.checkpoint_rect.overlaps(&self.player.rect){
+        if self.ground_rect.overlaps(&self.player.rect) || self.checkpoint_rect.overlaps(&self.player.rect) {
+
             // Checks impact velocity and rocket facing
             if (self.player.velocity.length() >= MAX_IMPACT_VELOCITY) ||
             ((self.player.facing.abs() > 1.0) && (self.player.facing.abs() < 5.0))
@@ -267,18 +274,19 @@ impl EventHandler for MyGame {
         // println!("PLAYER POS X: {}", self.player.pos.x);
         // println!("PLAYER POS Y: {}", self.player.pos.y);
         // println!("PLAYER FACING ANG: {}", self.player.facing);
-        // println!("PLAYER THRUST: {}", round(self.player.thrust, 2));
+        // println!("PLAYER throttle: {}", round(self.player.throttle, 2));
 
         // Deciding when to update the game, and how many times.
         // Run once for each frame fitting in the time since the last update.
         while ctx.time.check_update_time(DESIRED_FPS) {
-            let seconds = GRAVITY_ACCELERATION / (DESIRED_FPS as f32);
+
+            let dt = 1.0 / (DESIRED_FPS as f32);
             
             // Update the player state based on the user input.
-            player_handle_input(&mut self.player, &self.input, seconds);
+            player_handle_input(&mut self.player, &self.input, dt);
 
             // Update the physics for player
-            update_player_position(&mut self.player, seconds);
+            update_player_position(&mut self.player, dt);
 
             // Check rocket collision with objects
             self.check_collision(ctx);
@@ -291,11 +299,10 @@ impl EventHandler for MyGame {
             // Update rocket fuel text
             self.rocket_fuel_text = Text::new(format!("{:.2?}", self.player.fuel));
 
-            // Update player thrust text
-            // Rocket thrust floats between 0.0 and 4.0
+            // Update player throttle text
             // Converting to a number between 0.0 and 100.0 to display in the HUD
-            let converted_value: f32 = (round(self.player.thrust, 2) / 4.0) * 100.0;
-            self.rocket_thrust_text = Text::new(format!("{:.2?}", converted_value));
+            let converted_value: f32 = round(self.player.throttle * self.player.max_thrust, 2);
+            self.rocket_throttle_text = Text::new(format!("{:.2?}", converted_value));
 
             // Update player velocity text
             let mut mag = (self.player.velocity.x.powi(2)) + (self.player.velocity.y.powi(2));
@@ -419,7 +426,7 @@ impl EventHandler for MyGame {
 
 
         // ***********************************
-        // Draw Rocket thrust
+        // Draw Rocket throttle
         // ***********************************
         let thurst_number_pos = ggez::glam::Vec2::new(10.0, 250.0);
         let thurst_text_pos = ggez::glam::Vec2::new(10.0, 210.0);
@@ -437,15 +444,15 @@ impl EventHandler for MyGame {
         canvas.draw(&thurst_text, draw_param);
 
         // ******************
-        // Thrust Number
+        // throttle Number
         // ******************
-        self.rocket_thrust_text.set_scale(text_size);
+        self.rocket_throttle_text.set_scale(text_size);
 
         let draw_param = DrawParam::default()
             .dest(thurst_number_pos)
             .color(ggez::graphics::Color::WHITE);
 
-        canvas.draw(&self.rocket_thrust_text, draw_param);
+        canvas.draw(&self.rocket_throttle_text, draw_param);
 
 
 
@@ -462,13 +469,13 @@ impl EventHandler for MyGame {
     fn key_down_event(&mut self, ctx: &mut Context, input: KeyInput, _repeated: bool, ) -> GameResult {
         match input.keycode {
             Some(KeyCode::Up) => {
-                if round(self.player.thrust, 2) < 4.0 {
-                    self.player.thrust += ROCKET_THURST_FORCE;
+                if  self.player.throttle < 1.0 {
+                    self.player.throttle += ROCKET_THURST_FORCE ;
                 }
             }
             Some(KeyCode::Down) => {
-                if round(self.player.thrust, 2) > 0.0 {
-                    self.player.thrust -= ROCKET_THURST_FORCE;
+                if self.player.throttle> 0.0 {
+                    self.player.throttle -= ROCKET_THURST_FORCE;
                 }
             }
             Some(KeyCode::Left) => {
@@ -476,6 +483,12 @@ impl EventHandler for MyGame {
             }
             Some(KeyCode::Right) => {
                 self.input.xaxis = 1.0;
+            }
+            Some(KeyCode::Z) => {
+                self.player.throttle = 1.0;
+            }
+            Some(KeyCode::X) => {
+                self.player.throttle = 0.0;
             }
             Some(KeyCode::Escape) => ctx.request_quit(),
             _ => (), // Do nothing
