@@ -39,7 +39,7 @@ use ggez::input::keyboard::{KeyCode, KeyInput};
 // Player Consts
 // **********************************************************************
 // Rotation in radians per second.
-const ROCKET_TURN_RATE: f32 = 0.2;
+const ROCKET_TURN_RATE: f32 = 0.6;
 // Player Box size
 const ROCKET_BBOX: Vec2 = Vec2::new(37.0, 64.0);
 const ROCKET_THURST_FORCE: f32 = 0.1;
@@ -151,11 +151,7 @@ fn rocket_throttle(rocket: &mut Player, dt: f32) {
     let direction_vector = vec_from_angle(rocket.facing);
     let throttle_vector = direction_vector * (rocket.throttle * rocket.max_thrust);
 
-
-    
     rocket.velocity += throttle_vector * dt;
-
-
 
     if (rocket.fuel > 0.0) && (rocket.throttle > 0.0) {
         let fuel_consuption = round(rocket.throttle, 2) / 40.0;
@@ -219,7 +215,8 @@ impl MyGame {
             ImageFormat::Rgba8UnormSrgb, 
             1.0, 
             1.0,
-            1);
+            1
+        );
         let player = create_player();
         let assets = Assets::new(ctx)?;
         let rocket_velocity_text = Text::new(format!("{}", 0));
@@ -301,8 +298,9 @@ impl EventHandler for MyGame {
 
             // Update player throttle text
             // Converting to a number between 0.0 and 100.0 to display in the HUD
-            let converted_value: f32 = round(self.player.throttle * self.player.max_thrust, 2);
-            self.rocket_throttle_text = Text::new(format!("{:.2?}", converted_value));
+            let hud_throttle_value = self.player.throttle * 100.0;
+
+            self.rocket_throttle_text = Text::new(format!("{:.2?}", hud_throttle_value));
 
             // Update player velocity text
             let mut mag = (self.player.velocity.x.powi(2)) + (self.player.velocity.y.powi(2));
@@ -426,13 +424,13 @@ impl EventHandler for MyGame {
 
 
         // ***********************************
-        // Draw Rocket throttle
+        // Draw Rocket Throttle
         // ***********************************
         let thurst_number_pos = ggez::glam::Vec2::new(10.0, 250.0);
         let thurst_text_pos = ggez::glam::Vec2::new(10.0, 210.0);
 
         // ******************
-        // Thurst Text
+        // Throttle Text
         // ******************
         let mut thurst_text = Text::new(format!("Thurst:"));
         thurst_text.set_scale(text_size);
@@ -444,7 +442,7 @@ impl EventHandler for MyGame {
         canvas.draw(&thurst_text, draw_param);
 
         // ******************
-        // throttle Number
+        // Throttle Number
         // ******************
         self.rocket_throttle_text.set_scale(text_size);
 
@@ -474,7 +472,7 @@ impl EventHandler for MyGame {
                 }
             }
             Some(KeyCode::Down) => {
-                if self.player.throttle> 0.0 {
+                if self.player.throttle > 0.0 {
                     self.player.throttle -= ROCKET_THURST_FORCE;
                 }
             }
